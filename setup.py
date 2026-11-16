@@ -1,8 +1,13 @@
+import os
 from glob import glob
 
 from setuptools import find_packages, setup
 
 package_name = 'buscar_rojo'
+
+def ficheros(patron):
+    """Solo ficheros (data_files no admite carpetas como __pycache__)."""
+    return [f for f in glob(patron) if os.path.isfile(f)]
 
 setup(
     name=package_name,
@@ -12,7 +17,7 @@ setup(
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
-        ('share/' + package_name + '/world', glob('world/*')),
+        ('share/' + package_name + '/world', ficheros('world/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
