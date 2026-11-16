@@ -202,7 +202,7 @@ def main():
 
     nodo = YasminNode.get_instance()
     destino_x = nodo.declare_parameter('destino_x', -10.0).value
-    destino_y = nodo.declare_parameter('destino_y', -9.0).value
+    destino_y = nodo.declare_parameter('destino_y', 10.0).value
 
     sm = crear_fsm()
     visor = YasminViewerPub(sm, 'BUSCAR_ROJO')   # para verla en yasmin_viewer

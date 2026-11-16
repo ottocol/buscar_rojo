@@ -156,7 +156,7 @@ def main():
     rclpy.init(signal_handler_options=SignalHandlerOptions.NO)
     nodo = rclpy.create_node('bt_buscar_rojo')
     destino_x = nodo.declare_parameter('destino_x', -10.0).value
-    destino_y = nodo.declare_parameter('destino_y', -9.0).value
+    destino_y = nodo.declare_parameter('destino_y', 10.0).value
 
     arbol = py_trees_ros.trees.BehaviourTree(crear_arbol(destino_x, destino_y))
     try:
