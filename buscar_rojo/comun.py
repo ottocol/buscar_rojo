@@ -12,7 +12,7 @@ from geometry_msgs.msg import PoseStamped
 # ---------------------------------------------------------------------------
 # Topics de los sensores (robot simulado en mvsim)
 # ---------------------------------------------------------------------------
-TOPIC_CAMARA = '/camera1_image'
+TOPIC_CAMARA = '/camera1_rgb/image_raw'
 TOPIC_LASER = '/scan'
 TOPIC_VEL = '/cmd_vel'
 
