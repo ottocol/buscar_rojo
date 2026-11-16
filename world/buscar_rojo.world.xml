@@ -11,7 +11,7 @@
   <!-- robot-->
   <include file="$(ros2 pkg prefix mvsim)/share/mvsim/definitions/small_robot.vehicle.xml"/>
   <vehicle name="robot1" class="small_robot">
-		<init_pose>-10 10 -90</init_pose>  <!-- In global coords: x,y, yaw(deg) -->
+		<init_pose>-10 10 -25</init_pose>  <!-- In global coords: x,y, yaw(deg) -->
 		<init_vel>0 0 0</init_vel>  <!-- In local coords: vx,vy, omega(deg/s) -->
 
 
@@ -103,7 +103,7 @@
     <color>#ff0000</color>
     <zmin>0.0</zmin>
     <zmax>0.8</zmax>
-    <init_pose>-13 8 0</init_pose>
+    <init_pose>-7 0 0</init_pose>
     <shape>
       <pt>-0.3 -0.3</pt>
       <pt>-0.3  0.3</pt>
