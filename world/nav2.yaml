@@ -118,7 +118,7 @@ collision_monitor:
     observation_sources: [scan]
     scan:
       type: scan
-      topic: /laser1
+      topic: /scan
     polygons: ["slowdown_zone", "stop_zone"]
     slowdown_zone:
       type: polygon
