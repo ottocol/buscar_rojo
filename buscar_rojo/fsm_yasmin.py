@@ -201,8 +201,9 @@ def main():
     set_ros_loggers()   # los mensajes de YASMIN salen por el logger de ROS
 
     nodo = YasminNode.get_instance()
-    destino_x = nodo.declare_parameter('destino_x', -10.0).value
-    destino_y = nodo.declare_parameter('destino_y', 10.0).value
+    # por defecto, esquina interna donde el cubo de basura
+    destino_x = nodo.declare_parameter('destino_x', -2.0).value
+    destino_y = nodo.declare_parameter('destino_y', -7.0).value
 
     sm = crear_fsm()
     visor = YasminViewerPub(sm, 'BUSCAR_ROJO')   # para verla en yasmin_viewer

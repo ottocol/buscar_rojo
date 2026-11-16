@@ -23,8 +23,9 @@ def main():
     # Sin el manejador de Ctrl-C de rclpy, para poder cancelar la navegación al salir
     rclpy.init(signal_handler_options=SignalHandlerOptions.NO)
     nav = BasicNavigator(node_name='ir_a_punto')
-    x = nav.declare_parameter('x', -10.0).value
-    y = nav.declare_parameter('y', -9.0).value
+    #esquina interna donde el cubo de basura
+    x = nav.declare_parameter('x', -2.0).value
+    y = nav.declare_parameter('y', -7.0).value
     yaw = math.radians(nav.declare_parameter('yaw_grados', 0.0).value)
 
     destino = crear_pose(x, y, yaw)
