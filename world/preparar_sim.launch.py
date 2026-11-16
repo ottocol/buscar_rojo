@@ -19,7 +19,12 @@ ARGUMENTOS
     yaw_deg     orientación inicial (grados)               por defecto: -90
                 Los valores por defecto son los del <init_pose> de buscar_rojo.world.xml.
                 Si cambias la pose en el mundo, cámbiala también aquí (POSE_INICIAL).
-    nav2_delay  segundos de espera antes de lanzar Nav2 (por defecto 3)
+    nav2_delay  segundos de espera antes de lanzar Nav2 (por defecto 5)
+    sim_time    false (por defecto): mvsim sella todo con el reloj real y no publica /clock,
+                así ningún nodo necesita use_sim_time.
+                true: mvsim publica /clock y Nav2 usa tiempo simulado; entonces TODOS los
+                demás nodos deben lanzarse con  --ros-args -p use_sim_time:=true
+                (si un nodo usa otro reloj, Nav2 aborta con "Transform data too old").
 
 CÓMO SE FIJA LA POSE INICIAL
     En lugar de publicar en /initialpose (el nodo pose_inicial), se activan los parámetros
@@ -35,7 +40,7 @@ import tempfile
 import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
+from launch.actions import (DeclareLaunchArgument, GroupAction, IncludeLaunchDescription,
                             LogInfo, OpaqueFunction, TimerAction)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -90,6 +95,7 @@ def launch_setup(context, *args, **kwargs):
 
     nav2_params = nav2_params_with_initial_pose(params_file, x, y, yaw_deg)
     delay = float(LaunchConfiguration('nav2_delay').perform(context))
+    sim_time = LaunchConfiguration('sim_time').perform(context).lower() in ('true', '1', 'yes')
 
     mvsim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
@@ -97,6 +103,8 @@ def launch_setup(context, *args, **kwargs):
         launch_arguments={
             'world_file': world_file,
             'do_fake_localization': 'false',
+            # Todos con el mismo reloj: o el real (por defecto) o el de la simulación
+            'disable_sim_time_clock': 'false' if sim_time else 'true',
         }.items())
 
     nav2 = IncludeLaunchDescription(
@@ -105,15 +113,25 @@ def launch_setup(context, *args, **kwargs):
         launch_arguments={
             'map': map_file,
             'params_file': nav2_params,
+            'use_sim_time': 'true' if sim_time else 'false',
         }.items())
+
+    # Cada include va en su propio grupo aislado (scoped, sin forwarding): ninguno ve los
+    # argumentos del otro ni los de este launch, igual que al lanzarlos en terminales distintas.
+    # (Sin esto, los argumentos que declara un launch incluido "se filtran" a los siguientes.)
+    def aislado(include):
+        return GroupAction(actions=[include], scoped=True, forwarding=False)
 
     return [
         LogInfo(msg=f'[preparar_sim] Mundo: {world_dir}'),
         LogInfo(msg=f'[preparar_sim] Pose inicial: '
                     f'x={x:.2f} y={y:.2f} yaw={yaw_deg:.1f} grados'),
         LogInfo(msg=f'[preparar_sim] Parámetros de Nav2 usados: {nav2_params}'),
-        mvsim,
-        TimerAction(period=delay, actions=[nav2]),
+        LogInfo(msg='[preparar_sim] Reloj: ' + (
+            'tiempo SIMULADO (/clock). Lanza tus nodos con --ros-args -p use_sim_time:=true'
+            if sim_time else 'tiempo REAL (mvsim sin /clock). Tus nodos no necesitan nada')),
+        aislado(mvsim),
+        TimerAction(period=delay, actions=[aislado(nav2)]),
     ]
 
 
@@ -127,7 +145,10 @@ def generate_launch_description():
                               description='y inicial (m)'),
         DeclareLaunchArgument('yaw_deg', default_value=str(POSE_INICIAL[2]),
                               description='Orientación inicial (grados)'),
-        DeclareLaunchArgument('nav2_delay', default_value='3.0',
+        DeclareLaunchArgument('nav2_delay', default_value='5.0',
                               description='Segundos de espera antes de lanzar Nav2'),
+        DeclareLaunchArgument('sim_time', default_value='false',
+                              description='true: todos con el reloj de mvsim (/clock); '
+                                          'false: todos con el reloj real'),
         OpaqueFunction(function=launch_setup),
     ])
